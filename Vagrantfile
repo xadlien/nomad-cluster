@@ -15,15 +15,16 @@ Vagrant.configure("2") do |config|
   config.vm.box = "hashicorp/bionic64"
   config.vm.box_check_update = false
 
-  (1..3).each do |i|
+  (0..2).each do |i|
     config.vm.define "nomad-#{i}" do |node|
       node.vm.hostname = "nomad-#{i}"
       node.vm.provider "virtualbox" do |v|
         v.memory = 2048
         v.cpus = 2
       end
-      last_ip = i + 3
+      last_ip = i + 4
       node.vm.network "private_network", ip: "192.168.50.#{last_ip}"
+      node.vm.network "forwarded_port", guest: 4646, host: 14646 + i, guest_ip: "192.168.50.#{last_ip}"
       node.vm.provision "shell", inline: <<-SHELL
         curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
         sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
